@@ -1,5 +1,5 @@
-const spreadsheetId = '你的試算表ID'; // 請將這裡替換為你的試算表 ID
-const apiKey = '你的API金鑰'; // 請將這裡替換為你的 API 金鑰
+const spreadsheetId = '15ov6YOQw0NJywCCWYd6dTxV7EgFydpj0jQO8M-GYzFI/edit?gid=0#gid=0'; // 請將這裡替換為你的試算表 ID
+const apiKey = 'AIzaSyAfv65VHQCrOMmBAsE9vci-X3Hs_ViTpWk'; // 請將這裡替換為你的 API 金鑰
 
 // 初始化 Google API 客戶端
 function initClient() {
