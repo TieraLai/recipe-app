@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Data App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>食品配方管理</h1>
+    <div id="form">
+        <input type="text" id="ingredient" placeholder="材料名稱">
+        <input type="number" id="quantity" placeholder="數量">
+        <input type="number" id="price" placeholder="單價">
+        <button onclick="addRecipe()">新增配方</button>
+    </div>
+    <div id="output">
+        <h2>配方列表</h2>
+        <ul id="recipe-list"></ul>
+    </div>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
