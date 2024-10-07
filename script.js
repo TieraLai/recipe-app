@@ -1,39 +1,37 @@
-const spreadsheetId = '15ov6YOQw0NJywCCWYd6dTxV7EgFydpj0jQO8M-GYzFI/edit?gid=0#gid=0'; // 請將這裡替換為你的試算表 ID
-const apiKey = 'AIzaSyAfv65VHQCrOMmBAsE9vci-X3Hs_ViTpWk'; // 請將這裡替換為你的 API 金鑰
+// 導入 google-spreadsheet 套件
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 
-// 初始化 Google API 客戶端
-function initClient() {
-    gapi.client.init({
-        apiKey: apiKey,
-        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-    }).then(() => {
-        readSheet();
-    });
-}
+// 設定試算表 ID
+const spreadsheetId = '15ov6YOQw0NJywCCWYd6dTxV7EgFydpj0jQO8M-GYzFI'; // 請將這裡替換為你的試算表 ID
 
-// 讀取試算表資料
-function readSheet() {
-    gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: spreadsheetId,
-        range: 'Sheet1!A2:D',
-    }).then(response => {
-        const data = response.result.values;
-        const list = document.getElementById('recipe-list');
-        list.innerHTML = '';
-        if (data) {
-            data.forEach(row => {
-                const li = document.createElement('li');
-                li.textContent = `材料: ${row[0]}, 數量: ${row[1]}, 單價: ${row[2]}, 總成本: ${row[3]}`;
-                list.appendChild(li);
-            });
-        }
-    }).catch(error => {
-        console.error('讀取失敗', error);
+// Google 服務帳戶的憑證 JSON 檔案路徑
+const CREDENTIALS = require('./recipe-app-436609-91795b95b133.json'); // 替換為你的憑證檔案路徑
+
+async function accessSpreadsheet() {
+    // 建立 Google 試算表物件
+    const doc = new GoogleSpreadsheet(spreadsheetId);
+
+    // 使用服務帳戶進行驗證
+    await doc.useServiceAccountAuth(CREDENTIALS);
+
+    // 加載試算表資訊
+    await doc.loadInfo();
+    console.log(`試算表名稱: ${doc.title}`);
+
+    // 讀取指定範圍的資料 (例如 A2:D)
+    const sheet = doc.sheetsByIndex[0]; // 獲取第一個工作表
+    const rows = await sheet.getRows({ offset: 1, limit: 50 }); // 假設要讀取 A2 到 D 的資料
+    const list = document.getElementById('recipe-list');
+    list.innerHTML = '';
+    rows.forEach(row => {
+        const li = document.createElement('li');
+        li.textContent = `材料: ${row.材料}, 數量: ${row.數量}, 單價: ${row.單價}, 總成本: ${row.總成本}`;
+        list.appendChild(li);
     });
 }
 
 // 新增資料到試算表
-function addRecipe() {
+async function addRecipe() {
     const ingredient = document.getElementById('ingredient').value;
     const quantity = document.getElementById('quantity').value;
     const price = document.getElementById('price').value;
@@ -44,19 +42,15 @@ function addRecipe() {
         return;
     }
 
-    const values = [[ingredient, quantity, price, totalCost]];
-    gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId: spreadsheetId,
-        range: 'Sheet1!A1',
-        valueInputOption: 'USER_ENTERED',
-        resource: { values },
-    }).then(response => {
-        alert('資料已新增');
-        readSheet();
-    }).catch(error => {
-        console.error('新增失敗', error);
-    });
+    const values = [{ 材料: ingredient, 數量: quantity, 單價: price, 總成本: totalCost }];
+    const doc = new GoogleSpreadsheet(spreadsheetId);
+    await doc.useServiceAccountAuth(CREDENTIALS);
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    await sheet.addRows(values);
+    alert('資料已新增');
+    accessSpreadsheet(); // 重新讀取試算表資料
 }
 
-// 載入並初始化 Google API
-gapi.load('client', initClient);
+// 當頁面加載完成時，自動讀取試算表資料
+document.addEventListener('DOMContentLoaded', accessSpreadsheet);
